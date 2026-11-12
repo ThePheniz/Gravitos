@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920, user-scalable=no">
+<title>Gravitos</title>
+<link rel="preload" href="fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/app.css">
+<!-- The PC app (install from Edge or Chrome); not packaged for the TV. -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="pwa-192.png">
+<meta name="theme-color" content="#07070a">
+<!-- Samsung's TV APIs (AVPlay); resolved by the TV, harmlessly 404s in a desktop browser -->
+<script src="$WEBAPIS/webapis/webapis.js"></script>
+</head>
+<body>
+<div id="stage">
+  <!-- The Gravitos mark: a black hole with a tilted, glowing accretion ring (used via <use>). -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="gv-ring" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#ff8a3d" stop-opacity=".3"/>
+        <stop offset=".42" stop-color="#fff4e2"/>
+        <stop offset="1" stop-color="#ffb46a" stop-opacity=".4"/>
+      </linearGradient>
+      <radialGradient id="gv-glow">
+        <stop offset=".5" stop-color="#ffd7a3" stop-opacity=".5"/>
+        <stop offset="1" stop-color="#ff8a3d" stop-opacity="0"/>
+      </radialGradient>
+      <symbol id="gv-mark" viewBox="0 0 48 48">
+        <circle cx="24" cy="24" r="15" fill="url(#gv-glow)" stroke="none"/>
+        <path d="M2.5 24 A21.5 6.5 0 0 1 45.5 24" transform="rotate(-18 24 24)" fill="none" stroke="url(#gv-ring)" stroke-width="2.2" stroke-linecap="round"/>
+        <circle cx="24" cy="24" r="9" fill="#000" stroke="#ffe8c8" stroke-width="1.3"/>
+        <path d="M45.5 24 A21.5 6.5 0 0 1 2.5 24" transform="rotate(-18 24 24)" fill="none" stroke="url(#gv-ring)" stroke-width="2.6" stroke-linecap="round"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <div id="ambient"><div class="amb"></div><div class="amb"></div></div>
+
+  <div id="brandbar" class="lockup"><svg class="mark"><use href="#gv-mark"/></svg><span class="wm">Gravitos</span><span class="by">Developed by ThePheniz</span></div>
+
+  <nav id="rail">
+    <div class="rail-user"><div class="avatar"></div><span></span></div>
+    <div class="rail-items" data-axis="y"></div>
+  </nav>
+  <div id="topbar"><span id="clock"></span></div>
+  <!-- PC only (html.pc): mouse users' Back and Full screen. -->
+  <div id="pcbar" class="no-back"><div id="pc-back" class="pcbtn" title="Back"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></div><div id="pc-full" class="pcbtn" title="Full screen"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></div></div>
+
+  <section id="view-login" class="view">
+    <div class="login">
+      <div class="lockup big"><svg class="mark"><use href="#gv-mark"/></svg><span class="wm">Gravitos</span></div>
+      <h1>Sign in with Plex</h1>
+      <div class="login-ways">
+        <div class="way">
+          <div class="qr"></div>
+          <div class="way-label">Scan with your phone's camera</div>
+        </div>
+        <div class="or">or</div>
+        <div class="way">
+          <div class="way-label">Go to <b>plex.tv/link</b> and enter</div>
+          <div class="pin">····</div>
+        </div>
+      </div>
+      <p class="login-status">Waiting for you to sign in…</p>
+      <div class="buttons" data-axis="x"><div class="btn small focusable" id="btn-newcode"><span>Get a new code</span></div></div>
+    </div>
+  </section>
+
+  <section id="view-servers" class="view">
+    <div class="center">
+      <div class="lockup big"><svg class="mark"><use href="#gv-mark"/></svg><span class="wm">Gravitos</span></div>
+      <h1>Choose a server</h1>
+      <div class="server-list" data-axis="y"></div>
+      <p class="servers-status"></p>
+    </div>
+  </section>
+
+  <section id="view-profiles" class="view">
+    <div class="center">
+      <div class="lockup big"><svg class="mark"><use href="#gv-mark"/></svg><span class="wm">Gravitos</span></div>
+      <h1>Who's watching?</h1>
+      <div class="profile-list" data-axis="x"></div>
+      <div class="pin-pad" hidden>
+        <p class="pin-for"></p>
+        <div class="pin-dots"><i></i><i></i><i></i><i></i></div>
+        <div class="pin-keys" data-grid></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-home" class="view with-rail">
+    <img class="hero-bg" alt=""><img class="hero-bg" alt="">
+    <div class="shade"></div>
+    <div class="hero-info">
+      <div class="eyebrow"></div>
+      <div class="brand"></div>
+      <div class="kicker"></div>
+      <div class="meta"></div>
+      <p class="hero-summary"></p>
+    </div>
+    <div class="rows" data-clip><div class="rows-track" data-axis="y" data-up="none"></div></div>
+  </section>
+
+  <section id="view-library" class="view with-rail">
+    <header class="lib-head">
+      <h1 class="lib-title"></h1><span class="lib-count"></span>
+      <div class="lib-buttons buttons" data-axis="x" data-up="none">
+        <div class="btn small focusable genre-btn"></div>
+        <div class="btn small focusable coll-btn" hidden></div>
+        <div class="btn small focusable sort-btn" data-right="#view-library .az"></div>
+      </div>
+    </header>
+    <div class="grid-view" data-clip><div class="grid" data-grid data-up="#view-library .lib-buttons" data-down="none"></div></div>
+    <div class="az" data-axis="y" hidden></div>
+  </section>
+
+  <section id="view-service" class="view with-rail">
+    <header class="lib-head">
+      <h1 class="lib-title"></h1><span class="lib-count"></span>
+      <div class="lib-buttons buttons" data-axis="x" data-up="none"></div>
+    </header>
+    <div class="grid-view" data-clip><div class="grid" data-grid data-up="#view-service .lib-buttons" data-down="none"></div></div>
+  </section>
+
+  <section id="view-collections" class="view with-rail">
+    <header class="lib-head"><h1 class="lib-title">Collections</h1><span class="lib-count"></span></header>
+    <div class="grid-view" data-clip><div class="coll-grid" data-grid data-up="none" data-down="none"></div></div>
+  </section>
+
+  <section id="view-details" class="view">
+    <img class="backdrop" alt="">
+    <div class="shade"></div>
+    <div class="details-body"></div>
+    <div class="details-lower"></div>
+  </section>
+
+  <section id="view-search" class="view with-rail">
+    <div class="search-left">
+      <div class="query"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span class="q"></span></div>
+      <div class="keys" data-grid></div>
+    </div>
+    <div class="results-view" data-clip><div class="results grid" data-grid data-up="none" data-down="none"></div></div>
+  </section>
+
+  <section id="view-settings" class="view with-rail"><div class="settings"></div></section>
+
+  <div id="picker" hidden>
+    <div class="picker-panel">
+      <h2></h2>
+      <div class="picker-clip" data-clip>
+        <div class="picker-list" data-axis="y" data-up="none" data-down="none" data-left="none" data-right="none"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="player">
+    <video id="video" hidden></video>
+    <div id="spinner" hidden></div>
+    <div id="pause-veil" class="pause-veil" hidden><i></i></div>
+    <div id="subs" class="subs"></div>
+    <div id="skip" class="skip-btn" hidden></div>
+    <div id="osd" class="osd">
+      <div id="osd-paused" class="paused-badge" hidden>Paused</div>
+      <div id="osd-brand" class="brand"></div>
+      <div id="osd-sub" class="osd-sub"></div>
+      <div class="bar"><i id="osd-fill"></i><span id="osd-ticks" class="ticks"></span><b id="osd-knob"></b><div id="osd-thumb" class="thumb" hidden><img alt=""></div><span id="osd-tip" class="tip" hidden></span></div>
+      <div class="times"><span id="osd-cur"></span><span id="osd-ends" class="ends"></span><span id="osd-end"></span></div>
+      <div id="osd-controls" class="controls"></div>
+    </div>
+    <div id="chapters" class="chapters" hidden>
+      <h3>Chapters</h3>
+      <div class="ch-clip"><div id="ch-track" class="ch-track"></div></div>
+    </div>
+    <div id="upnext" class="upnext" hidden>
+      <small id="upnext-head">Up next in <span id="upnext-count">5</span></small>
+      <div id="upnext-title"></div>
+      <div id="upnext-hint" class="hint">OK to play now · Back to stop</div>
+    </div>
+    <div id="info" class="info-panel" hidden></div>
+  </div>
+
+  <div id="toast"></div>
+
+  <div id="splash">
+    <canvas></canvas>
+    <div class="splash-words">
+      <div class="splash-name">Gravitos</div>
+      <div class="splash-by">Developed by ThePheniz</div>
+    </div>
+  </div>
+</div>
+<script src="js/splash.js"></script>
+<script src="js/vendor/qrcode.js"></script>
+<script src="js/config.js"></script>
+<!-- Private keys (not committed; may be absent, which is fine) -->
+<script src="js/config.local.js"></script>
+<script src="js/plex.js"></script>
+<script src="js/subs.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/player.js"></script>
+<script src="js/franchises.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

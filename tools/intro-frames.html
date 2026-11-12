@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<!-- Renders the startup animation at chosen moments, for reviewing it frame by frame:
+     open http://localhost:8765/tools/intro-frames.html (add ?tv for the TV's look) and call
+     frameAt(ms) in increasing order (frameAt(ms, true) also says "Home is ready"). Used with
+     tools/drive.mjs: eval:frameAt(1500) shot:f1500 -->
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../css/app.css">
+<style>html, body { background: #000; } #stage { width: 100vw; height: 100vh; }</style>
+</head>
+<body>
+<div id="stage">
+  <div id="splash">
+    <canvas></canvas>
+    <div class="splash-words">
+      <div class="splash-name">Gravitos</div>
+      <div class="splash-by">Developed by ThePheniz</div>
+    </div>
+  </div>
+</div>
+<script>
+  // The renderer asks for frames; we hand them out with our own clock.
+  let pending = null;
+  window.requestAnimationFrame = f => { pending = f; };
+  const tv = /[?&]tv\b/.test(location.search);
+  document.documentElement.classList.add(tv ? 'tv' : 'pc');
+</script>
+<script>
+  // ?src=intro-lab/<name>/splash-gl.js renders a prototype instead of the app's intro;
+  // ?css=intro-lab/<name>/words.css adds its styling for the words.
+  const qs = new URLSearchParams(location.search);
+  if (qs.get('css')) document.write(`<link rel="stylesheet" href="${qs.get('css')}">`);
+  document.write(`<script src="${qs.get('src') || '../js/splash-gl.js'}"><\/script>`);
+</script>
+<script>
+  const splash = document.getElementById('splash'), cv = splash.querySelector('canvas');
+  const k = qs.get('k') ? +qs.get('k') : tv ? .5 : 1; // the TV draws at half size and upscales (?k= to try others)
+  cv.width = Math.round(innerWidth * k); cv.height = Math.round(innerHeight * k);
+  // Words are laid out for the 1920x1080 stage.
+  const words = splash.querySelector('.splash-words');
+  words.style.cssText = `width:1920px;height:1080px;transform-origin:0 0;transform:scale(${innerHeight / 1080});left:${(innerWidth - 1920 * innerHeight / 1080) / 2}px`;
+  let outAt = null;
+  const events = [];
+  const send = GravitosSplash(cv, e => {
+    events.push(e);
+    if (e === 'swallow') splash.classList.add('pull');
+  });
+  for (const a of document.getAnimations()) a.pause();
+  pending(0);
+  window.frameAt = (ms, go) => {
+    if (go) send('go');
+    const f = pending; pending = null;
+    if (f) f(ms);
+    if (outAt === null && events.includes('swallow')) outAt = ms;
+    for (const a of document.getAnimations()) {
+      a.pause();
+      a.currentTime = a instanceof CSSTransition ? Math.max(0, ms - (outAt || ms)) : ms;
+    }
+    return events.join(',');
+  };
+</script>
+</body>
+</html>

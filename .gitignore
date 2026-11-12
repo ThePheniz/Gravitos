@@ -1,0 +1,10 @@
+# Private keys and sign-ins (see js/config.local.example.js)
+js/config.local.js
+
+# Build output: packaged apps contain config.local.js
+build/
+*.wgt
+
+# Test results and browser profiles from the intro lab and bench
+tools/intro-lab/bench/results/
+.prof*/
